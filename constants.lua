@@ -1,0 +1,1 @@
+DEF_FONT_SIZE = 10
