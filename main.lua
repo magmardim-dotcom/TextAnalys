@@ -85,14 +85,14 @@ function calculate_button:onClick()
 end
 
 function open_button:onClick()
-  local file = ui.opendialog("добавить текстовый файл", false)
+  local file = ui.opendialog("добавить текстовый файл", false, "Text files (*.txt)|*.txt")
   
   if file then
     
     return msg_("файл для анализа открыт")
   else
     
-    return msg_("файл не подходит")
+    return msg_("ошибка открытия файла")
   end
 end
 
