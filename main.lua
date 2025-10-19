@@ -1,14 +1,16 @@
 -- подключаем модули
 local ui = require "ui"
+utf8 = require("utf8")
 -- подключаем вспомогательные переменные и методы
 local const = require "constants"
+local analis = require "analis"
 -- основное окно
 local win=ui.Window("Music",520,380)
 -- лэйбел "Имя сохраняемого файла"
 local filename_label = ui.Label(win, "Имя сохраняемого файла", 20, 20)
   filename_label.fontsize = DEF_FONT_SIZE
 -- кнопка генерации имени
-local genName_button = ui.Button(win, "Сгенерировать", 20, 50)
+local genName_button = ui.Button(win, "Генерировать", 20, 50)
 -- строка ввода имени сохраняемого файла
 local filename_entry = ui.Entry(win, "", 190, 20, 200)
 -- кнопка "Cохранить"
@@ -26,28 +28,51 @@ local difword_number_label = ui.Label(win, difword, 60, 105, 50)
   difword_number_label.textalign = "center"
 -- кнопка "Открыть"
 local open_button = ui.Button(win, "Открыть", 20, 140, 130, 30)
+file = nil
 -- кнопка "Анализ"
 local calculate_button = ui.Button(win, "Анализ текста", 20, 180, 130, 30)
 -- лэйбел события
 local msg = ""
 local msg_label = ui.Label(win, msg, 20, 360)
-local function msg_(string)
+local function msg_(string, bul)
   if not string then return false end
   msg = string
   msg_label.text = string
-  return true
+  return bul or true
 end
 -- редактор
 local edit = ui.Edit(win, "", 190, 100, 300, 250)
 
+-- сохраняемый файл
+log = nil
+dir = nil
+
+-- функция чтения файла и вывода его содержимого
+function fileRead(file)
+  if file.exists then
+    local text = ""
+    file:open()
+    
+    for line in file.lines do
+      text = text..line
+    end
+    file:close()
+    return text
+  else
+    return false
+  end
+end
 
 -- событие onClick кнопок:
 function save_button:onClick()
-  
   if filename_entry.text ~= "" then
-    return msg_("журнал сохранён под именем "..filename_entry.text)
+    local save_file = sys.File("logouts/"..filename_entry.text..".txt")
+    save_file:open("write")
+    save_file:write(log)
+    save_file:close()
+    return msg_("журнал сохранён под именем '"..filename_entry.text.."'")
   else
-    return msg_("журнал не сохранен так как отсутствует имя файла"..filename_entry.text)
+    return msg_("журнал не сохранен так как отсутствует имя файла", false)
   end
 end
 
@@ -80,31 +105,25 @@ function difword_sub_button:onClick()
 end
 
 function calculate_button:onClick()
-  
-  return msg_("текст проанализирован")
-end
-
-function open_button:onClick()
-  local file = ui.opendialog("добавить текстовый файл", false, "Text files (*.txt)|*.txt")
-  
-  if file then
-    
-    return msg_("файл для анализа открыт")
+  local logout, logOut = analis(file, difword)
+  if logout then
+    edit.text = logout
+    log = logOut
+    return msg_("текст проанализирован")
   else
-    
-    return msg_("ошибка открытия файла")
+    return msg_("оишбка анализа текста")
   end
 end
 
-
-
-
+function open_button:onClick()
+  local addfile = ui.opendialog("выберете файл для анализа", false, "Text files (*.txt)|*.txt")
+  if addfile then file = fileRead(addfile) end  
   
-  
-  
-  
-  
-  
-  
+  if file then
+    return msg_("файл добавлен")
+  else
+    return msg_("ошибка открытия файла", false)
+  end
+end
   
 ui.run(win):wait()
