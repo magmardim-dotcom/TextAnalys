@@ -76,8 +76,11 @@ local analis = function(t, difWord)
 	logOut = logOut..'\nWords for analysis:\n'
 	for n = 1,#word do logOut = logOut..word[n]..' ' end
 	
---	logOut = logOut..'\n\nDifferent words:\n'
---	for n = 1,#dw do logOut = logOut..dw[n]..' ' end
+	logOut = logOut..'\n\nDifferent words:\n'
+	for n = 1,#dw do logOut = logOut..dw[n]..' ' end
+  
+  local fres = 206.835 - (1.52 * (#word/sent)) - (65.14 * (lett/#word))
+  out = out..'Индекс удобочитаемости Флеша: '..fres
 	
 	return out, logOut
 end
